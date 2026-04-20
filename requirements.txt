@@ -3,11 +3,12 @@ uvicorn[standard]==0.29.0
 sqlalchemy==2.0.29
 alembic==1.13.1
 psycopg2-binary==2.9.9
-faiss-cpu==1.8.0
+asyncpg==0.29.0
+faiss-cpu
 google-generativeai==0.5.0
 PyJWT==2.8.0
 passlib[bcrypt]==1.7.4
-PyMuPDF==1.24.1
+pypdf==4.1.0
 python-dotenv==1.0.1
 python-multipart==0.0.9
 pydantic==2.6.4
