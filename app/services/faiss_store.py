@@ -83,15 +83,18 @@ def search_vectors(org_id: str, query_vector: list[float], top_k: int = 5) -> li
     return [int(idx) for idx in I[0] if idx != -1]
 
 def remove_vectors(org_id: str, faiss_ids: list[int]) -> None:
-    """
-    Remove vectors from the organization's FAISS index by their internal IDs.
-    """
     if not faiss_ids:
         return
-        
     with _get_lock(org_id):
         index = load_index(org_id)
-        if index.ntotal > 0:
-            sel = faiss.IDSelectorBatch(np.array(faiss_ids, dtype=np.int64))
-            index.remove_ids(sel)
-            save_index(org_id, index)
+        if index.ntotal == 0:
+            return
+        # Rebuild index excluding the removed IDs
+        all_vectors = index.reconstruct_n(0, index.ntotal)
+        faiss_ids_set = set(faiss_ids)
+        keep_indices = [i for i in range(index.ntotal) if i not in faiss_ids_set]
+        new_index = faiss.IndexFlatL2(768)
+        if keep_indices:
+            kept_vectors = np.array([all_vectors[i] for i in keep_indices], dtype=np.float32)
+            new_index.add(kept_vectors)
+        save_index(org_id, new_index)

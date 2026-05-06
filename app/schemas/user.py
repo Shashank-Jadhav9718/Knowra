@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class UserCreate(BaseModel):
@@ -20,6 +20,13 @@ class UserOut(BaseModel):
     email: EmailStr
     role: str
     organization_id: UUID
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def extract_role_value(cls, v):
+        if hasattr(v, "value"):
+            return v.value
+        return str(v)
 
     model_config = ConfigDict(from_attributes=True)
 

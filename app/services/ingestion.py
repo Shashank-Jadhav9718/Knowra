@@ -16,11 +16,11 @@ async def ingest_document(file_path: str, document_id: UUID, organization_id: UU
     
     # 1. Extract text from PDF using PyMuPDF (fitz) page by page
     try:
+        pages = []
         doc = fitz.open(file_path)
-        full_text = ""
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
-            full_text += page.get_text() + "\n"
+            pages.append(page.get_text())
         doc.close()
     except Exception as e:
         logger.error(f"Failed to extract text from {file_path}: {e}")
@@ -28,7 +28,7 @@ async def ingest_document(file_path: str, document_id: UUID, organization_id: UU
 
     # 2. Chunk text using chunk_document() from app.utils.chunker
     logger.info(f"Chunking extracted text for document {document_id}")
-    chunks = chunk_document(full_text)
+    chunks = chunk_document(pages)
     
     if not chunks:
         logger.warning(f"No text chunks generated for document {document_id}")
