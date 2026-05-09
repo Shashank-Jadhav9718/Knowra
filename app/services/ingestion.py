@@ -1,12 +1,14 @@
 import fitz  # PyMuPDF
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.utils.logger import get_logger
-logger = get_logger(__name__)
 from app.utils.chunker import chunk_document
 from app.services.embedding import get_embedding
 from app.services.faiss_store import add_vectors
 from app.db.models import Chunk
+
+logger = get_logger(__name__)
 
 async def ingest_document(file_path: str, document_id: UUID, organization_id: UUID, db: AsyncSession) -> int:
     """
