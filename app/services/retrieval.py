@@ -11,11 +11,12 @@ async def retrieve_chunks(query: str, organization_id: str, db: AsyncSession, to
     Retrieve top_k chunks for a query from FAISS and return their DB representations,
     ensuring they belong to the correct organization.
     """
-    # 1. Get embedding for the query
-    query_vector = get_query_embedding(query)
+    import asyncio
+    # 1. Get embedding for the query asynchronously to avoid blocking the event loop
+    query_vector = await asyncio.to_thread(get_query_embedding, query)
     
     # 2. Retrieve nearest neighbor IDs from FAISS index
-    faiss_index_ids = search_vectors(organization_id, query_vector, top_k)
+    faiss_index_ids = search_vectors(str(organization_id), query_vector, top_k)
     
     if not faiss_index_ids:
         return []
@@ -26,7 +27,7 @@ async def retrieve_chunks(query: str, organization_id: str, db: AsyncSession, to
         .join(Document, Chunk.document_id == Document.id)
         .where(
             Chunk.faiss_index_id.in_(faiss_index_ids),
-            Document.organization_id == organization_id
+            Document.organization_id == organization_id  # keep as-is, SQLAlchemy handles UUID comparison
         )
         .options(selectinload(Chunk.document))
     )

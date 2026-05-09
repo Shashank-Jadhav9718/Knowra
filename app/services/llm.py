@@ -1,3 +1,4 @@
+import asyncio
 import google.generativeai as genai
 from fastapi import HTTPException
 from app.core.config import settings
@@ -29,7 +30,7 @@ Answer:"""
     return prompt
 
 
-def generate_answer(prompt: str) -> str:
+async def generate_answer(prompt: str) -> str:
     """
     Calls the Gemini API to generate an answer based on the prompt.
     """
@@ -38,7 +39,9 @@ def generate_answer(prompt: str) -> str:
         generation_config = genai.types.GenerationConfig(
             temperature=0.2, max_output_tokens=1024
         )
-        response = model.generate_content(prompt, generation_config=generation_config)
+        response = await asyncio.to_thread(
+            model.generate_content, prompt, generation_config=generation_config
+        )
         return response.text
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"LLM generation failed: {str(e)}")

@@ -10,7 +10,7 @@ from app.schemas.query import QueryRequest, QueryResponse
 from app.services.retrieval import retrieve_chunks
 from app.services.llm import build_prompt, generate_answer
 
-router = APIRouter(prefix="/query", tags=["Query"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post("", response_model=QueryResponse)
@@ -29,7 +29,7 @@ async def process_query(
     else:
         # 3. Build prompt -> call generate_answer()
         prompt = build_prompt(request.query, chunks)
-        answer = generate_answer(prompt)
+        answer = await generate_answer(prompt)
         
         # sources: list[dict] (chunk text + filename)
         sources = [{"text": chunk["text"], "filename": chunk["filename"]} for chunk in chunks]

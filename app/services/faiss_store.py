@@ -82,13 +82,13 @@ def search_vectors(org_id: str, query_vector: list[float], top_k: int = 5) -> li
     
     return [int(idx) for idx in I[0] if idx != -1]
 
-def remove_vectors(org_id: str, faiss_ids: list[int]) -> None:
+def remove_vectors(org_id: str, faiss_ids: list[int]) -> dict[int, int]:
     if not faiss_ids:
-        return
+        return {}
     with _get_lock(org_id):
         index = load_index(org_id)
         if index.ntotal == 0:
-            return
+            return {}
         # Rebuild index excluding the removed IDs
         all_vectors = index.reconstruct_n(0, index.ntotal)
         faiss_ids_set = set(faiss_ids)
@@ -98,3 +98,9 @@ def remove_vectors(org_id: str, faiss_ids: list[int]) -> None:
             kept_vectors = np.array([all_vectors[i] for i in keep_indices], dtype=np.float32)
             new_index.add(kept_vectors)
         save_index(org_id, new_index)
+        
+        # Map old index to new index
+        mapping = {}
+        for new_idx, old_idx in enumerate(keep_indices):
+            mapping[old_idx] = new_idx
+        return mapping

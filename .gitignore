@@ -8,3 +8,21 @@ __pycache__/
 
 # MacOS
 .DS_Store
+
+# Never commit real env
+.env
+!.env.example
+
+# Test artifacts
+test.db
+*.db
+.pytest_cache/
+
+# Data directories
+uploads/
+faiss_index/
+faiss_indexes/
+
+# Virtual environment
+venv/
+.venv/

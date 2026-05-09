@@ -40,3 +40,4 @@ class TokenData(BaseModel):
     user_id: Optional[UUID] = None
     organization_id: Optional[UUID] = None
     role: Optional[str] = None
+    model_config = ConfigDict(extra="ignore")

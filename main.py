@@ -4,7 +4,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -75,3 +76,10 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])
 app.include_router(query.router, prefix="/query", tags=["query"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/", include_in_schema=False)
+async def serve_ui():
+    return FileResponse("static/index.html")

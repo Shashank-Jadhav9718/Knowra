@@ -15,7 +15,7 @@ def _get_embedding_with_retry(text: str, task_type: str) -> list[float]:
     for attempt in range(max_attempts):
         try:
             result = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/gemini-embedding-2",
                 content=text,
                 task_type=task_type
             )
@@ -34,12 +34,12 @@ def _get_embedding_with_retry(text: str, task_type: str) -> list[float]:
 
 def get_embedding(text: str) -> list[float]:
     """
-    Get embedding for a document using models/text-embedding-004.
+    Get embedding for a document using models/embedding-001.
     """
     return _get_embedding_with_retry(text, task_type="retrieval_document")
 
 def get_query_embedding(text: str) -> list[float]:
     """
-    Get embedding for a search query using models/text-embedding-004.
+    Get embedding for a search query using models/embedding-001.
     """
     return _get_embedding_with_retry(text, task_type="retrieval_query")

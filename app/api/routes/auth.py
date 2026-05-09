@@ -5,10 +5,10 @@ from sqlalchemy.future import select
 
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.session import get_db
-from app.db.models import User
+from app.db.models import User, Organization
 from app.schemas.user import UserCreate, UserOut, Token
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -23,6 +23,14 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
+    
+    # Auto-create organization if it doesn't exist
+    org_result = await db.execute(select(Organization).where(Organization.id == user_in.organization_id))
+    existing_org = org_result.scalars().first()
+    if not existing_org:
+        new_org = Organization(id=user_in.organization_id, name="Test Organization")
+        db.add(new_org)
+        await db.commit()
     
     # Hash password and create user
     hashed_password = hash_password(user_in.password)

@@ -1,7 +1,8 @@
 import fitz  # PyMuPDF
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.utils.logger import logger
+from app.utils.logger import get_logger
+logger = get_logger(__name__)
 from app.utils.chunker import chunk_document
 from app.services.embedding import get_embedding
 from app.services.faiss_store import add_vectors
@@ -39,9 +40,10 @@ async def ingest_document(file_path: str, document_id: UUID, organization_id: UU
     db_chunks = []
     vectors = []
     
+    import asyncio
     for text_chunk in chunks:
-        # Get embedding
-        vector = get_embedding(text_chunk)
+        # Get embedding asynchronously to avoid blocking the event loop
+        vector = await asyncio.to_thread(get_embedding, text_chunk)
         vectors.append(vector)
         
         # Store Chunk row in DB

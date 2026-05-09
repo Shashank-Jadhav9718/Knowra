@@ -12,7 +12,8 @@ from app.schemas.document import DocumentOut, DocumentList
 from app.services.ingestion import ingest_document
 from app.core.config import settings
 from app.services.faiss_store import remove_vectors
-from app.utils.logger import logger
+from app.utils.logger import get_logger
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -110,8 +111,24 @@ async def delete_document(
     chunks = chunks_result.scalars().all()
     faiss_ids = [chunk.faiss_index_id for chunk in chunks if chunk.faiss_index_id != -1]
     
-    # Remove from FAISS
-    remove_vectors(str(current_user.organization_id), faiss_ids)
+    from sqlalchemy import update, case
+    
+    # Remove from FAISS and get ID mapping
+    mapping = remove_vectors(str(current_user.organization_id), faiss_ids)
+    
+    # Update other chunks in the DB with their new faiss_index_id
+    if mapping:
+        whens = {old_id: new_id for old_id, new_id in mapping.items()}
+        await db.execute(
+            update(Chunk)
+            .where(
+                Chunk.faiss_index_id.in_(mapping.keys()),
+                Chunk.document_id.in_(
+                    select(Document.id).where(Document.organization_id == current_user.organization_id)
+                )
+            )
+            .values(faiss_index_id=case(whens, value=Chunk.faiss_index_id))
+        )
     
     # Remove file from disk
     if os.path.exists(document.file_path):

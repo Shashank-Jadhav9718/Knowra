@@ -10,7 +10,7 @@ from app.core.dependencies import get_current_admin
 from app.db.session import get_db
 from app.db.models import User, QueryHistory, Document, Chunk, UserRole
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter()
 
 # --- Schemas ---
 
