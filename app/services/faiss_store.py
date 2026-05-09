@@ -77,10 +77,10 @@ def search_vectors(org_id: str, query_vector: list[float], top_k: int = 5) -> li
     k = min(top_k, index.ntotal)
     query_np = np.array([query_vector], dtype=np.float32)
     
-    # D is distances, I is indices
-    D, I = index.search(query_np, k)
+    # distances is D, indices is I
+    distances, indices = index.search(query_np, k)
     
-    return [int(idx) for idx in I[0] if idx != -1]
+    return [int(idx) for idx in indices[0] if idx != -1]
 
 def remove_vectors(org_id: str, faiss_ids: list[int]) -> dict[int, int]:
     if not faiss_ids:
