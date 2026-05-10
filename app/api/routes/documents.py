@@ -113,8 +113,10 @@ async def delete_document(
     
     from sqlalchemy import update, case
     
+    import asyncio
+    
     # Remove from FAISS and get ID mapping
-    mapping = remove_vectors(str(current_user.organization_id), faiss_ids)
+    mapping = await asyncio.to_thread(remove_vectors, str(current_user.organization_id), faiss_ids)
     
     # Update other chunks in the DB with their new faiss_index_id
     if mapping:
@@ -133,7 +135,7 @@ async def delete_document(
     # Remove file from disk
     if os.path.exists(document.file_path):
         try:
-            os.remove(document.file_path)
+            await asyncio.to_thread(os.remove, document.file_path)
         except OSError as e:
             logger.warning(f"Could not remove file {document.file_path}: {e}")
         

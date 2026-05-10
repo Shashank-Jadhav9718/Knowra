@@ -18,20 +18,26 @@ async def ingest_document(file_path: str, document_id: UUID, organization_id: UU
     logger.info(f"Starting ingestion for document {document_id} from {file_path}")
     
     # 1. Extract text from PDF using PyMuPDF (fitz) page by page
-    try:
+    import asyncio
+    
+    def extract_text(path: str) -> list[str]:
         pages = []
-        doc = fitz.open(file_path)
+        doc = fitz.open(path)
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
             pages.append(page.get_text())
         doc.close()
+        return pages
+        
+    try:
+        pages = await asyncio.to_thread(extract_text, file_path)
     except Exception as e:
         logger.error(f"Failed to extract text from {file_path}: {e}")
         raise
 
     # 2. Chunk text using chunk_document() from app.utils.chunker
     logger.info(f"Chunking extracted text for document {document_id}")
-    chunks = chunk_document(pages)
+    chunks = await asyncio.to_thread(chunk_document, pages)
     
     if not chunks:
         logger.warning(f"No text chunks generated for document {document_id}")
@@ -67,7 +73,7 @@ async def ingest_document(file_path: str, document_id: UUID, organization_id: UU
     chunk_ids = [str(c.id) for c in db_chunks]
     
     # Add vectors to FAISS and get the FAISS internal index IDs
-    faiss_ids = add_vectors(str(organization_id), vectors, chunk_ids)
+    faiss_ids = await asyncio.to_thread(add_vectors, str(organization_id), vectors, chunk_ids)
     
     # Update each Chunk with its corresponding FAISS index ID
     for db_chunk, faiss_id in zip(db_chunks, faiss_ids):

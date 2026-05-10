@@ -16,7 +16,7 @@ async def retrieve_chunks(query: str, organization_id: str, db: AsyncSession, to
     query_vector = await asyncio.to_thread(get_query_embedding, query)
     
     # 2. Retrieve nearest neighbor IDs from FAISS index
-    faiss_index_ids = search_vectors(str(organization_id), query_vector, top_k)
+    faiss_index_ids = await asyncio.to_thread(search_vectors, str(organization_id), query_vector, top_k)
     
     if not faiss_index_ids:
         return []
