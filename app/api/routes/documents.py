@@ -93,53 +93,48 @@ async def delete_document(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
+    import asyncio
     result = await db.execute(
         select(Document).where(Document.id == document_id)
     )
     document = result.scalars().first()
-    
+
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-        
+
     if document.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Forbidden")
-        
-    # Get all chunks to get FAISS IDs before deleting the document
+
+    # Get FAISS IDs for this document's chunks before deleting
     chunks_result = await db.execute(
         select(Chunk).where(Chunk.document_id == document_id)
     )
     chunks = chunks_result.scalars().all()
     faiss_ids = [chunk.faiss_index_id for chunk in chunks if chunk.faiss_index_id != -1]
-    
-    from sqlalchemy import update, case
-    
-    import asyncio
-    
-    # Remove from FAISS and get ID mapping
-    mapping = await asyncio.to_thread(remove_vectors, str(current_user.organization_id), faiss_ids)
-    
-    # Update other chunks in the DB with their new faiss_index_id
-    if mapping:
-        whens = {old_id: new_id for old_id, new_id in mapping.items()}
-        await db.execute(
-            update(Chunk)
-            .where(
-                Chunk.faiss_index_id.in_(mapping.keys()),
-                Chunk.document_id.in_(
-                    select(Document.id).where(Document.organization_id == current_user.organization_id)
+
+    # Remove from FAISS (rebuild index without these vectors)
+    if faiss_ids:
+        mapping = await asyncio.to_thread(remove_vectors, str(current_user.organization_id), faiss_ids)
+        # Update remaining chunks in this org with their new FAISS positions
+        if mapping:
+            for chunk_to_update in await db.scalars(
+                select(Chunk)
+                .join(Document, Chunk.document_id == Document.id)
+                .where(
+                    Document.organization_id == current_user.organization_id,
+                    Chunk.faiss_index_id.in_(list(mapping.keys()))
                 )
-            )
-            .values(faiss_index_id=case(whens, value=Chunk.faiss_index_id))
-        )
-    
+            ):
+                chunk_to_update.faiss_index_id = mapping[chunk_to_update.faiss_index_id]
+
     # Remove file from disk
     if os.path.exists(document.file_path):
         try:
             await asyncio.to_thread(os.remove, document.file_path)
         except OSError as e:
             logger.warning(f"Could not remove file {document.file_path}: {e}")
-        
-    # Delete from DB
+
+    # Delete document from DB (cascades to chunks)
     await db.delete(document)
     await db.commit()
     return

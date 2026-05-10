@@ -1,33 +1,15 @@
-# Git
-.git
-.gitignore
-
-# Python
+venv/
+new_venv/
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-.Python
-.venv/
-venv/
-env/
-
-# Environment variables
+.git/
+.github/
 .env
-.env.*
-
-# Tests
 .pytest_cache/
-.coverage
-htmlcov/
-
-# Volumes / Data (handled by Docker named volumes)
-faiss_indexes/
 uploads/
-postgres_data/
-
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
+faiss_indexes/
+faiss_index/
+tests/
+*.md
+.gitignore
