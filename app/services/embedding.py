@@ -15,7 +15,7 @@ def _get_embedding_with_retry(text: str, task_type: str) -> list[float]:
     for attempt in range(max_attempts):
         try:
             result = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/embedding-001",
                 content=text,
                 task_type=task_type
             )
