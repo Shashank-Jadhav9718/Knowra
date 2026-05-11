@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -37,7 +37,20 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: Optional[UUID] = None
-    organization_id: Optional[UUID] = None
+    user_id: Optional[Union[UUID, str]] = None
+    organization_id: Optional[Union[UUID, str]] = None
     role: Optional[str] = None
     model_config = ConfigDict(extra="ignore")
+
+    @field_validator("user_id", "organization_id", mode="before")
+    @classmethod
+    def coerce_to_uuid(cls, v):
+        """Coerce string UUIDs from JWT payload to UUID objects."""
+        if v is None:
+            return v
+        if isinstance(v, UUID):
+            return v
+        try:
+            return UUID(str(v))
+        except (ValueError, AttributeError):
+            return v

@@ -1,5 +1,5 @@
 venv/
-new_venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
@@ -13,3 +13,4 @@ faiss_index/
 tests/
 *.md
 .gitignore
+.dockerignore

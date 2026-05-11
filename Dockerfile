@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libopenblas-dev \
     libomp-dev \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -21,8 +22,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Fix line endings (Windows -> Unix) and make entrypoint executable
+RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
+
 # Expose the application port
 EXPOSE 8000
 
-# Start the FastAPI app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run migrations then start the FastAPI app
+ENTRYPOINT ["./entrypoint.sh"]

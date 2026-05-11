@@ -24,13 +24,13 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Auto-create organization if it doesn't exist
+    # Auto-create organization if it doesn't exist (within the same transaction)
     org_result = await db.execute(select(Organization).where(Organization.id == user_in.organization_id))
     existing_org = org_result.scalars().first()
     if not existing_org:
-        new_org = Organization(id=user_in.organization_id, name="Test Organization")
+        new_org = Organization(id=user_in.organization_id, name="Default Organization")
         db.add(new_org)
-        await db.commit()
+        await db.flush()  # flush only, don't commit — keep everything in one transaction
     
     # Hash password and create user
     hashed_password = hash_password(user_in.password)
@@ -72,6 +72,7 @@ async def login(
     
     access_token = create_access_token(
         data={
+            "sub": str(user.id),  # standard JWT 'sub' claim
             "user_id": str(user.id),
             "organization_id": str(user.organization_id),
             "role": role_value

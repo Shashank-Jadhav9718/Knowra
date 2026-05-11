@@ -326,8 +326,12 @@
                     method: 'DELETE',
                     headers: getHeaders()
                 });
-                const data = await res.json();
-                displayResponse('docsResponse', data, res.ok);
+                if (res.status === 204) {
+                    displayResponse('docsResponse', { message: "Document deleted successfully." }, true);
+                } else {
+                    const data = await res.json();
+                    displayResponse('docsResponse', data, res.ok);
+                }
             } catch (err) {
                 displayResponse('docsResponse', { error: err.message }, false);
             }

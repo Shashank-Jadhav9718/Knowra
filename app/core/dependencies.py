@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,8 +26,14 @@ async def get_current_user(
     
     if token_data.user_id is None:
         raise credentials_exception
+    
+    # Ensure user_id is a UUID for the DB query
+    try:
+        user_uuid = token_data.user_id if isinstance(token_data.user_id, UUID) else UUID(str(token_data.user_id))
+    except (ValueError, AttributeError):
+        raise credentials_exception
         
-    result = await db.execute(select(User).where(User.id == token_data.user_id))
+    result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalars().first()
     
     if user is None:
