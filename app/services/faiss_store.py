@@ -22,7 +22,7 @@ def _load_index_unsafe(org_id: str) -> faiss.IndexFlatL2:
     path = _get_index_path(org_id)
     if os.path.exists(path):
         return faiss.read_index(path)
-    return faiss.IndexFlatL2(768)
+    return faiss.IndexFlatL2(3072)
 
 def _save_index_unsafe(org_id: str, index: faiss.IndexFlatL2) -> None:
     """Save index WITHOUT acquiring lock. Caller must hold the lock."""
@@ -71,7 +71,7 @@ def remove_vectors(org_id: str, faiss_ids: list[int]) -> dict[int, int]:
         all_vectors = index.reconstruct_n(0, index.ntotal)
         faiss_ids_set = set(faiss_ids)
         keep_indices = [i for i in range(index.ntotal) if i not in faiss_ids_set]
-        new_index = faiss.IndexFlatL2(768)
+        new_index = faiss.IndexFlatL2(3072)
         if keep_indices:
             kept_vectors = np.array([all_vectors[i] for i in keep_indices], dtype=np.float32)
             new_index.add(kept_vectors)

@@ -53,7 +53,7 @@ async def generate_answer(prompt: str) -> str:
                 data = response.json()
                 return data.get("response", "")
         else:
-            model = genai.GenerativeModel("gemini-1.5-pro")
+            model = genai.GenerativeModel("gemini-2.5-flash")
             generation_config = genai.types.GenerationConfig(
                 temperature=0.2, max_output_tokens=1024
             )
