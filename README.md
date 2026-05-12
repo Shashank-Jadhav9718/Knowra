@@ -1,23 +1,29 @@
-# 🧠 Smart Search: Intelligent Multi-Tenant RAG Agent
+<div align="center">
+  <h1>🧠 Knowra: Intelligent Multi-Tenant RAG Agent</h1>
+  <p>
+    <b>A production-grade, multi-tenant Retrieval-Augmented Generation (RAG) system built to intelligently query and synthesize knowledge from documents. Designed with a focus on advanced AI/ML architecture, data privacy, and high-performance vector search.</b>
+  </p>
+  
+  ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+  ![FastAPI](https://img.shields.io/badge/FastAPI-0.110.1-009688?style=for-the-badge&logo=fastapi)
+  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)
+  ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+  ![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google)
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.110.1-009688?style=for-the-badge&logo=fastapi)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
-![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google)
+</div>
 
-> A production-grade, multi-tenant Retrieval-Augmented Generation (RAG) system built to intelligently query and synthesize knowledge from documents. Designed with a focus on advanced AI/ML architecture, data privacy, and high-performance vector search.
-
----
+<br/>
 
 ## 🌟 Project Highlights
 
 This project was engineered from the ground up to demonstrate end-to-end expertise in modern AI/ML pipelines, specifically focusing on **Natural Language Processing (NLP)** and **Information Retrieval**.
 
-- **Semantic Understanding**: Uses dense vector embeddings (`models/gemini-embedding-2`, 3072 dimensions) to understand the *meaning* of queries, moving beyond traditional keyword search.
-- **High-Speed Inference**: Powered by the state-of-the-art `gemini-2.5-flash` LLM for rapid, context-aware synthesis.
-- **Multi-Tenant Architecture**: Strict logical isolation of vector indices (FAISS) and relational data (PostgreSQL) ensuring data privacy across different users and organizations.
-- **Asynchronous Ingestion**: Non-blocking background tasks handle PDF parsing, chunking, and embedding generation, allowing the API to remain highly responsive.
+- 🎯 **Semantic Understanding**: Uses dense vector embeddings (`models/gemini-embedding-2`, 3072 dimensions) to understand the *meaning* of queries, moving beyond traditional keyword search.
+- ⚡ **High-Speed Inference**: Powered by the state-of-the-art `gemini-2.5-flash` LLM for rapid, context-aware synthesis.
+- 🔒 **Multi-Tenant Architecture**: Strict logical isolation of vector indices (FAISS) and relational data (PostgreSQL) ensuring data privacy across different users and organizations.
+- ⚙️ **Asynchronous Ingestion**: Non-blocking background tasks handle PDF parsing, chunking, and embedding generation, allowing the API to remain highly responsive.
+
+---
 
 ## 🏗️ Architecture Overview
 
@@ -42,22 +48,26 @@ graph TD
     end
 ```
 
+---
+
 ## 🛠️ Tech Stack
 
 | Component | Technology | Purpose |
-| --- | --- | --- |
+| :--- | :--- | :--- |
 | **Framework** | FastAPI | High-performance async REST API with automatic OpenAPI documentation. |
 | **Database** | PostgreSQL + SQLAlchemy | Relational persistence for Users, Auth, Chunk Metadata, and Query Logs. |
 | **Vector Store** | FAISS | High-speed, in-memory Nearest Neighbor (k-NN) similarity search. |
 | **AI Models** | Google Gemini API | `gemini-embedding-2` for 3072D embeddings; `gemini-2.5-flash` for generation. |
 | **Authentication**| OAuth2 + JWT | Secure, stateless multi-tenant authentication. |
 
+---
+
 ## 🚀 Getting Started
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/knowra.git
-   cd knowra
+   git clone https://github.com/Shashank-Jadhav9718/Knowra.git
+   cd Knowra
    ```
 
 2. **Configure environment variables**
@@ -72,15 +82,19 @@ graph TD
    docker-compose up --build -d
    ```
 
+---
+
 ## 🔌 API Reference
 
 | Method | Route | Auth | Description |
-| --- | --- | --- | --- |
+| :--- | :--- | :--- | :--- |
 | `POST` | `/auth/register` | None | Register a new user and create an organization. |
 | `POST` | `/auth/login` | None | Authenticate and retrieve a JWT Bearer token. |
 | `POST` | `/documents/upload` | User | Upload a PDF. Triggers async vector embedding pipeline. |
 | `GET` | `/documents` | User | Retrieve all processed documents for the organization. |
 | `POST` | `/query` | User | Submit a natural language query against the vector database. |
+
+---
 
 ## 🧠 Deep Dive: How It Works
 
@@ -91,6 +105,3 @@ FAISS does not natively support tenant partitioning. To solve this, the system i
 
 ### Handling High-Dimensional Data
 The system was recently upgraded to support Google's latest embedding models. By expanding the FAISS index architecture from 768 to **3072 dimensions**, the system captures significantly deeper semantic nuances, resulting in highly accurate context retrieval even for complex or poorly-phrased user queries.
-
----
-*Built as a showcase of modern AI/ML engineering and production-ready backend design.*
