@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
-from pydantic import BaseModel, ConfigDict, EmailStr, UUID4
+from pydantic import BaseModel, ConfigDict, EmailStr
+from uuid import UUID
 
 from app.core.dependencies import get_current_admin
 from app.db.session import get_db
@@ -15,16 +16,16 @@ router = APIRouter()
 # --- Schemas ---
 
 class UserOut(BaseModel):
-    id: UUID4
+    id: UUID
     email: EmailStr
     role: UserRole
-    organization_id: UUID4
+    organization_id: UUID
     
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 class QueryHistoryOut(BaseModel):
-    id: UUID4
-    user_id: UUID4
+    id: UUID
+    user_id: UUID
     query: str
     response: str
     timestamp: datetime
